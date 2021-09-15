@@ -1,0 +1,2 @@
+# Node.js
+Criando Microsserviços e Integrações com Node.js, Neste projeto iremos desenvolver uma solução de e-commerce com a arquitetura de microserviços e aplicar a integração entre eles orientada a eventos com Apache Kafka e garantir a compatibilidade entre da comunicação dos microsserviços com Schema Registry. Para isso, programaremos em Java utilizando a stack do Spring (Spring Boot, Spring Cloud Streams).
