@@ -1,39 +1,40 @@
-import { NextFunction, Request, Response } from 'express';
-import { ForbiddenError } from '../errors/forbidden.error';
-import userRepository from '../repositories/user.repository';
+import { NextFunction, Request, Response } from "express";
+import ForbiddenError from "../models/errors/forbidden.error.model";
+import userRepository from "../repositories/user.repository";
 
-const basicAuthMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+async function basicAuthenticationMiddleware(req: Request, res: Response, next: NextFunction) {
     try {
-        const authorizationHeader = req.headers.authorization;
-    
+        const authorizationHeader = req.headers['authorization'];
+
         if (!authorizationHeader) {
-            throw new ForbiddenError({ log: 'Credenciais not found' });
+            throw new ForbiddenError('Credenciais não informadas');
         }
-    
-        const [authorizationType, base64Token] = authorizationHeader.split(' ');
-    
-        if (authorizationType !== 'Basic') {
-            throw new ForbiddenError({ log: 'Invalid authorization type' });
+
+        const [authenticationType, token] = authorizationHeader.split(' ');
+
+        if (authenticationType !== 'Basic' || !token) {
+            throw new ForbiddenError('Tipo de authenticação inválido');
         }
-    
-        const [username, password] = Buffer.from(base64Token, 'base64').toString('utf-8').split(':');
-    
+
+        const tokenContent = Buffer.from(token, 'base64').toString('utf-8');
+
+        const [username, password] = tokenContent.split(':');
+
         if (!username || !password) {
-            throw new ForbiddenError({ log: 'Credenciais not found' });
+            throw new ForbiddenError('Credenciais não preenchidas');
         }
-    
+
         const user = await userRepository.findByUsernameAndPassword(username, password);
-    
+        
         if (!user) {
-            throw new ForbiddenError({ log: 'Invalid credentials' });
+            throw new ForbiddenError('Usuário ou senha inválidos!');
         }
-    
+
         req.user = user;
-        return next();
+        next();
     } catch (error) {
-        return next(error);
+        next(error);
     }
 }
 
-export default basicAuthMiddleware;
-
+export default basicAuthenticationMiddleware;

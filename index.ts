@@ -1,34 +1,25 @@
-import express, { Request, Response } from 'express';
-import db from './database';
-import errorHanddlerMiddleware from './middlewares/error-handdles.middleware';
-import jwtAuthenticationMiddleware from './middlewares/jwt-authentication.middleware';
-import authenticationRoute from './routes/authentication.route';
-import userRoute from './routes/user.route';
+
+import express from 'express';
+import errorHandler from './middlewares/error-handler.middleware';
+import authorizationRoute from './routes/authorization.route';
+import statusRoute from './routes/status.route';
+import usersRoute from './routes/users.route';
 
 const app = express();
 
+// Configurações da aplicação
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/authentication', authenticationRoute);
-app.use('/users', jwtAuthenticationMiddleware, userRoute);
+// Configurações de Rotas
+app.use(statusRoute);
+app.use(usersRoute);
+app.use(authorizationRoute);
 
-app.use(errorHanddlerMiddleware);
+// Configuração dos Handlers de Erro
+app.use(errorHandler);
 
-app.use('/', (req: Request, res: Response) => {
-    res.json({ message: 'ok' });
+// Inicialização do servidor
+app.listen(3000, () => {
+    console.log('Aplicação executando na porta 3000!');
 });
-
-const server = app.listen(3000, () => {
-    console.log('listem on 3000!');
-});
-
-process.on('SIGTERM', () => {
-    db.end(() => {
-        console.log('database connection closed!')
-    });
-    server.close(() => {
-        console.log('server on 3000 closed!');
-    });
-})
-
